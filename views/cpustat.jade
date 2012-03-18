@@ -1,0 +1,106 @@
+h2 CPUstats
+
+script
+  var updaterate = 300;
+  var chart;
+  socket.on('cpustats', function(evt) {
+       var parsed;
+       try {
+           parsed = JSON.parse(evt);
+       } catch (e) {
+           console.log("Not json message received: "+evt);
+           return;
+       }
+       var series = chart.series[0];
+       var x = (new Date()).getTime();
+       var y = parsed.data.cpu.user - last_value;
+       last_value = parsed.data.cpu.user;
+       // console.log('addPoint: ' + x + ' y: '+y);
+       series.addPoint([x,y], true, true);
+  });
+
+  socket.on('disconnect', function(){
+        console.log("Disconnected.");
+  });
+
+  var updateTimerCallback = function() {
+       socket.send(JSON.stringify({sensor: 'cpustats', cpu: 'cpu'}));
+       /* Update chart rate */
+       //var new_updaterate = $("#rangeselector").val();
+       var new_updaterate = updaterate;
+  };
+  var updateTimer = setInterval(updateTimerCallback, updaterate);
+
+script
+    $(document).ready(function() {
+        var options =
+            { chart: {
+                animation: {
+                    duration: 200,
+                    easing: 'linear'
+                },
+                renderTo: 'systemcpu',
+                defaultSeriesType: 'spline',
+                marginRight: 10,
+            },
+            title: {
+                text: 'Live /proc/stat statistics'
+            },
+            xAxis: {
+                type: 'datetime',
+                tickPixelInterval: 150
+            },
+            yAxis: {
+                title: {
+                    text: 'Value'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            tooltip: {
+                formatter: function() {
+                    return '<b>'+ this.series.name +'</b><br/>'+
+                    Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) +'<br/>'+ 
+                    Highcharts.numberFormat(this.y, 2);
+                }
+            },
+            legend: {
+                    enabled: false,
+            },
+            credits: {
+                    text: 'magik-cypress',
+                    href: 'http://magik-cypress.fr'
+            },
+            plotOptions: {
+                spline: {
+                    animation: false
+                }
+            },
+            series: [{
+                name: 'CPUstats data',
+                data: (function() {
+                    // generate an array of random data
+                    var data = [],
+                        time = (new Date()).getTime(),
+                            i;
+                        for (i = -19; i <= 0; i++) {
+                            data.push({
+                                x: time + i * 1000,
+                                y: 0
+                            });
+                        }
+                        return data;
+                    }
+                )()
+            }]}
+        chart = new Highcharts.Chart(options);
+    });
+
+div#systemcpu(style="width: auto; height: 500px; margin: 0 auto")
+div#current_data
+p Adjust refresh time: 
+div#slider(style="display: block;")
+p#refreshrate(style="text-align: center; font-size: 3em; font-weight: bold;")

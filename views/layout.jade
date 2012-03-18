@@ -1,0 +1,149 @@
+!!! 5
+html(lang="en")
+  head
+    title Beautiful RealTime Graph
+    meta(charset='utf-8')
+    meta(name='viewport', content='initial-scale=1, maximum-scale=1')
+    block extra_css
+    link(rel='stylesheet', href='/bootstrap.min.css')
+    link(rel='stylesheet', href='/bootstrap-responsive.min.css')
+    link(rel='stylesheet', href='/allstyle.css')
+    block extra_js
+    script(src="/jquery.min.js ")
+    script(src="/jquery-ui.min.js")
+    script(src="/underscore-min.js")
+    script(src='socket.io/lib/socket.io.js')
+    script(src='/highcharts.js')
+    script(src='/realtime-graph.js')
+    script(src='RGraph/libraries/RGraph.common.core.js')
+    script(src="RGraph/libraries/RGraph.common.context.js")
+    script(src="RGraph/libraries/RGraph.common.annotate.js")
+    script(src="RGraph/libraries/RGraph.common.tooltips.js")
+    script(src="RGraph/libraries/RGraph.common.zoom.js")
+    script(src="RGraph/libraries/RGraph.common.resizing.js")
+    script(src="RGraph/libraries/RGraph.vprogress.js")
+    script
+      var last_value = 0;
+      var socket = io.connect('http://localhost:4000/http');
+      socket.on('connect', function(){
+           console.log("Connected.");
+      });
+      socket.on('statiotitle', function (data) {
+          document.getElementById('statiotitle').innerHTML = '<b>' + data.statiotitle + ':</b>  '
+      });
+      socket.on('statio', function (data) {
+          document.getElementById('statio').innerHTML = data.statio
+          document.getElementById('statiobar').innerHTML = drawBarGraph('statiobar', data.statio)
+      });
+      socket.on('statcputitle', function (data) {
+          document.getElementById('statcputitle').innerHTML = '<b>' + data.statcputitle + ':</b>  '
+      });
+      socket.on('statcpu', function (data) {
+          document.getElementById('statcpu').innerHTML = data.statcpu
+          document.getElementById('statcpubar').innerHTML = drawBarGraph('statcpubar', data.statcpu)
+      });
+      socket.on('statbptitle', function (data) {
+          document.getElementById('statbptitle').innerHTML = '<b>' + data.statbptitle + ':</b>  '
+      });
+      socket.on('statbp', function (data) {
+          document.getElementById('statbp').innerHTML = data.statbp
+          document.getElementById('statbprecvbar').innerHTML = drawBarGraph('statbprecvbar', data.statbp)
+          document.getElementById('statbpsendbar').innerHTML = drawBarGraph('statbpsendbar', data.statbp)
+      });
+      socket.on('dateclocktitle', function (data) {
+        document.getElementById('dateclocktitle').innerHTML = '<b>' + data.dateclocktitle + ':</b>  '
+      });
+      socket.on('dateclock', function (data) {
+        document.getElementById('dateclock').innerHTML = data.dateclock
+      });
+
+    script
+      function drawBarGraph(canvas, build) {
+        var current;
+        var title;
+        var d = new Array();
+        d = build.split(' ');
+        if( canvas == 'statcpubar' ) {
+            current = d[1]
+            title = 'CPU Stat'
+            thermostat = 100
+            bgcolor = 'red'
+        } else if( canvas == 'statbprecvbar' ) {
+            c = d[10].split('|')
+            current = c[1].split(0, -1)
+            title = 'BP Stat Recv'
+            thermostat = 10000
+            bgcolor = 'blue'
+        } else if( canvas == 'statbpsendbar' ) {
+            current = d[11].split(0, -1)
+            title = 'BP Stat Send'
+            thermostat = 10000
+            bgcolor = 'yellow'
+        } else {
+            current = d[5]
+            title = 'IO Stat'
+            thermostat = 100
+            bgcolor = 'green'
+        }
+        var bar = new RGraph.VProgress(canvas, [current], thermostat);
+        bar.Set('chart.colors', [bgcolor]);
+        bar.Set('chart.title', title);
+        bar.Draw();
+      }
+
+
+
+  body
+    div.navbar.navbar-fixed-top
+        div.navbar-inner
+            div.container
+                a(href='').btn.btn-navbar
+                    span.icon-bar
+                    span.icon-bar
+                    span.icon-bar
+                a(href='/').brand Beautiful RealTime Graph
+                div.nav-collapse
+                ul.nav
+                    li.first
+                      a(href='/') Home
+                    li
+                      a(href='/cpustat') CPUstats
+                    li.last
+                      a(href='/about') About
+                    li
+                      a(href="#")#dateclocktitle
+                    li
+                      a(href="#")#dateclock
+
+    h1 Beautiful RealTime Graph
+
+    header.jumbotron.subhead#overview
+      div.subnav
+         ul.nav.nav-pills
+            li
+                a(href="#")#statiotitle
+            li
+                a(href="#")#statio
+            li
+                a(href="#")#statcputitle
+            li
+                a(href="#")#statcpu
+            li
+                a(href="#")#statbptitle
+            li
+                a(href="#")#statbp
+
+    div.row.show-grid
+        div.span24 
+            h2 Vertical statistics
+            div.row.show-grid
+                div.span3
+                    canvas(id="statiobar", width="250", height="240")
+                div.span3
+                    canvas(id="statcpubar", width="250", height="240")
+                div.span3
+                    canvas(id="statbprecvbar", width="250", height="240")
+                div.span3
+                    canvas(id="statbpsendbar", width="250", height="240")
+
+    #container!= body
