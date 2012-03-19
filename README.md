@@ -7,7 +7,7 @@ work on GNU/Linux system (require /proc/diskstats)
 
 # Installation
 
-install node.js v0.4.8 and npm
+install node.js v0.6.13 and npm
 
     // install node
     git clone clone git://github.com/joyent/node.git
