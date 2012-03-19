@@ -1,8 +1,8 @@
 {
   "name": "rlstat",
   "dependencies": {
-    "socket.io": ">=0.9"
-    "express": ">=2.5.4"
+    "socket.io": ">=0.9",
+    "express": ">=2.5.4",
     "jade": ">=0.21.0"
   },
   "version": "0.0.1"
