@@ -21,3 +21,11 @@ install the required npm modules
 
     cd rlstat
     npm install (this installs the deps defined in `/package.json`)
+
+install the required dstat
+
+    Archlinux
+    pacman -S dstat
+
+    Debian/Ubuntu
+    aptitude install dstat
